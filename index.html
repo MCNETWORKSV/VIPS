@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loja Oficial - Servidor Minecraft</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0b0f19; color: #f8fafc; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        
+        header { text-align: center; margin-bottom: 25px; margin-top: 20px; }
+        h1 { font-size: 2.8rem; color: #38bdf8; margin-bottom: 10px; text-shadow: 0 2px 8px rgba(56, 189, 248, 0.3); }
+        p.subtitle { color: #94a3b8; font-size: 1.15rem; }
+
+        /* Navegação por Abas */
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 25px;
+            background-color: #1e293b;
+            padding: 8px;
+            border-radius: 12px;
+            border: 1px solid #334155;
+            justify-content: center;
+        }
+        .tab-btn {
+            background-color: transparent;
+            border: none;
+            color: #94a3b8;
+            padding: 10px 18px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tab-btn.active, .tab-btn:hover {
+            background-color: #2563eb;
+            color: #fff;
+        }
+
+        /* Conteúdo das Abas */
+        .tab-content {
+            display: none;
+            width: 100%;
+            max-width: 960px;
+            flex-direction: column;
+            align-items: center;
+        }
+        .tab-content.active {
+            display: flex;
+        }
+
+        /* Caixa de Inserção de Nick */
+        .nick-container {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            padding: 20px 25px;
+            max-width: 960px;
+            width: 100%;
+            margin-bottom: 25px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        .nick-container label { font-size: 1.1rem; color: #facc15; font-weight: bold; margin-bottom: 10px; }
+        .nick-container input {
+            width: 100%;
+            max-width: 400px;
+            padding: 12px 15px;
+            background-color: #0b0f19;
+            border: 2px solid #475569;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1.1rem;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .nick-container input:focus { border-color: #38bdf8; }
+        .nick-container small { color: #94a3b8; margin-top: 8px; font-size: 0.9rem; }
+
+        /* Caixa de Aviso Importante */
+        .notice-box {
+            background-color: rgba(234, 179, 8, 0.1);
+            border: 1px solid rgba(234, 179, 8, 0.4);
+            border-radius: 10px;
+            padding: 18px 25px;
+            max-width: 960px;
+            width: 100%;
+            margin-bottom: 35px;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .notice-icon { font-size: 1.5rem; line-height: 1; }
+        .notice-content h4 { color: #facc15; font-size: 1.1rem; margin-bottom: 5px; }
+        .notice-content p { color: #cbd5e1; font-size: 0.95rem; line-height: 1.5; }
+
+        /* Container dos Produtos */
+        .container { display: flex; flex-wrap: wrap; gap: 25px; justify-content: center; width: 100%; }
+        
+        .card { 
+            background-color: #1e293b; 
+            border-radius: 14px; 
+            padding: 30px 25px; 
+            width: 300px; 
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between; 
+            border: 1px solid #334155; 
+            transition: transform 0.3s ease, border-color 0.3s ease; 
+        }
+        .card:hover { transform: translateY(-6px); border-color: #475569; }
+        
+        .card h3 { font-size: 1.6rem; margin-bottom: 10px; color: #facc15; }
+        .card.master h3 { color: #38bdf8; }
+        .card.unban h3 { color: #f87171; }
+        
+        .price { font-size: 2rem; font-weight: bold; color: #4ade80; margin-bottom: 20px; }
+        
+        .card ul { list-style: none; margin-bottom: 25px; color: #cbd5e1; font-size: 0.95rem; }
+        .card ul li { margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        
+        .btn { 
+            display: block; 
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); 
+            color: white; 
+            text-decoration: none; 
+            padding: 12px; 
+            border-radius: 8px; 
+            text-align: center; 
+            font-weight: bold; 
+            transition: opacity 0.2s, transform 0.1s; 
+            box-shadow: 0 4px 6px rgba(37, 99, 235, 0.3);
+            cursor: pointer;
+            border: none;
+            width: 100%;
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+        }
+        .btn:hover { opacity: 0.9; }
+        .btn:active { transform: scale(0.98); }
+
+        .btn-whats {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            box-shadow: 0 4px 6px rgba(34, 197, 94, 0.3);
+        }
+
+        /* Estilos para a Aba de Vantagens Detalhadas */
+        .benefits-container {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            width: 100%;
+            max-width: 960px;
+        }
+        .benefit-card {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .benefit-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #facc15;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 10px;
+        }
+        .benefit-card.master h3 { color: #38bdf8; }
+        .benefit-section-title {
+            color: #38bdf8;
+            font-weight: bold;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            font-size: 1.05rem;
+        }
+        .benefit-card ul {
+            list-style: none;
+            padding-left: 5px;
+        }
+        .benefit-card ul li {
+            color: #cbd5e1;
+            margin-bottom: 6px;
+            font-size: 0.95rem;
+        }
+
+        /* Secção de Suporte / WhatsApp */
+        .support-container {
+            max-width: 960px;
+            width: 100%;
+            background-color: #1e293b;
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid #334155;
+            text-align: center;
+        }
+        .support-container h3 { color: #38bdf8; margin-bottom: 15px; font-size: 1.5rem; }
+        .support-container p { color: #cbd5e1; margin-bottom: 20px; line-height: 1.5; }
+        .whatsapp-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background-color: #22c55e;
+            color: white;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: background-color 0.2s;
+        }
+        .whatsapp-btn:hover { background-color: #16a34a; }
+
+        footer { margin-top: 40px; color: #64748b; font-size: 0.9rem; text-align: center; padding-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Loja Oficial do Servidor</h1>
+        <p class="subtitle">Adquira vantagens exclusivas e ajude a manter o servidor online!</p>
+    </header>
+
+    <!-- Navegação por Abas -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="mudarAba('loja', event)">🛒 Comprar & Loja</button>
+        <button class="tab-btn" onclick="mudarAba('vantagens', event)">✨ Vantagens dos VIPs</button>
+        <button class="tab-btn" onclick="mudarAba('suporte', event)">💬 Suporte / WhatsApp</button>
+    </div>
+
+    <!-- Campo do Nick do Jogador -->
+    <div id="nickBox" class="nick-container">
+        <label for="playerNick">🎮 Digite o seu Nick (Nome) no Minecraft:</label>
+        <input type="text" id="playerNick" placeholder="Ex: Notch" autocomplete="off">
+        <small>Insira o seu nick corretamente para gerar os botões de pagamento e envio de comprovante.</small>
+    </div>
+
+    <!-- ABA 1: LOJA & COMPRAS -->
+    <div id="aba-loja" class="tab-content active">
+        <!-- Aviso Importante de Prazo / Funcionamento -->
+        <div class="notice-box">
+            <div class="notice-icon">⚠️</div>
+            <div class="notice-content">
+                <h4>Aviso Importante sobre a Ativação</h4>
+                <p>A nossa equipa de staff não fica online 24 horas por dia. O processamento e a entrega dos pacotes ou remoção de punições são feitos manualmente após a confirmação do pagamento. Pedimos a vossa compreensão caso ocorra um pequeno atraso de algumas horas.</p>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- VIP -->
+            <div class="card">
+                <div>
+                    <h3>VIP Padrão</h3>
+                    <div class="price">R$ 25,00</div>
+                    <ul>
+                        <li>✔ Kit VIP exclusivo</li>
+                        <li>✔ Tag personalizada no chat</li>
+                        <li>✔ Comando /fly e /workbench</li>
+                        <li>✔ Slots extras no Leilão (AH)</li>
+                    </ul>
+                </div>
+                <div>
+                    <button class="btn" onclick="comprar('https://mpago.la/28r7j3e')">💳 Pagar via Pix (Mercado Pago)</button>
+                    <button class="btn btn-whats" onclick="enviarComprovante('VIP Padrão - R$ 25,00')">💬 Enviar Comprovante no Whats</button>
+                </div>
+            </div>
+
+            <!-- VIP MASTER -->
+            <div class="card master">
+                <div>
+                    <h3>VIP MASTER</h3>
+                    <div class="price">R$ 50,00</div>
+                    <ul>
+                        <li>✔ Todas as vantagens do VIP</li>
+                        <li>✔ Tag Master exclusiva</li>
+                        <li>✔ Comandos /feed, /heal, /repair</li>
+                        <li>✔ Até 5 EnderChests virtuais (/ec)</li>
+                    </ul>
+                </div>
+                <div>
+                    <button class="btn" onclick="comprar('https://mpago.la/1jZh4KX')">💳 Pagar via Pix (Mercado Pago)</button>
+                    <button class="btn btn-whats" onclick="enviarComprovante('VIP MASTER - R$ 50,00')">💬 Enviar Comprovante no Whats</button>
+                </div>
+            </div>
+
+            <!-- UNBAN -->
+            <div class="card unban">
+                <div>
+                    <h3>UNBAN</h3>
+                    <div class="price">R$ 20,00</div>
+                    <ul>
+                        <li>✔ Remove o banimento da conta</li>
+                        <li>✔ Acesso imediato após aprovação</li>
+                        <li>✔ Uma nova chance para jogar</li>
+                    </ul>
+                </div>
+                <div>
+                    <button class="btn" onclick="comprar('https://mpago.la/2tMxuQ9')">💳 Pagar via Pix (Mercado Pago)</button>
+                    <button class="btn btn-whats" onclick="enviarComprovante('UNBAN - R$ 20,00')">💬 Enviar Comprovante no Whats</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ABA 2: VANTAGENS DETALHADAS -->
+    <div id="aba-vantagens" class="tab-content">
+        <div class="benefits-container">
+            
+            <!-- Grupo VIP -->
+            <div class="benefit-card">
+                <h3>⭐ Grupo [VIP] - Vantagens</h3>
+                
+                <div class="benefit-section-title">» Comandos e Utilidades:</div>
+                <ul>
+                    <li>&nbsp;&nbsp;⊳ Limite de homes: <b>10</b></li>
+                    <li>&nbsp;&nbsp;⊳ Comandos: <span style="color:#4ade80;">/Lixo</span>, <span style="color:#4ade80;">/Afk</span>, <span style="color:#4ade80;">/Reparar</span></li>
+                    <li>&nbsp;&nbsp;⊳ Comando: <span style="color:#4ade80;">/VN</span> (<span style="color:#4ade80;">Visão Noturna</span>)</li>
+                </ul>
+
+                <div class="benefit-section-title">» Recompensas na Ativação:</div>
+                <ul>
+                    <li>&nbsp;&nbsp;⊳ Dinheiro: <span style="color:#4ade80;">$10.000</span></li>
+                    <li>&nbsp;&nbsp;⊳ Blocos: <b>16x Diamante, Ouro, Ferro, Esmeralda</b></li>
+                    <li>&nbsp;&nbsp;⊳ Itens Extras: <b>Elytra, Spawner, 3x Shulkers</b></li>
+                    <li>&nbsp;&nbsp;⊳ God Apples: <span style="color:#e879f9;">16x Maçãs Douradas Encantadas</span></li>
+                    <li>&nbsp;&nbsp;⊳ Extras: <b>64x Exp, 8x Hoppers, 10x Chaves (Caixas)</b></li>
+                </ul>
+
+                <div class="benefit-section-title">» Kit VIP (/kit vip):</div>
+                <ul>
+                    <li>&nbsp;&nbsp;⊳ <span style="color:#38bdf8;">Armadura completa de Diamante</span> (Proteção IV)</li>
+                    <li>&nbsp;&nbsp;⊳ <span style="color:#38bdf8;">Ferramentas completas</span> (Eficiência V, Fortuna III)</li>
+                    <li>&nbsp;&nbsp;⊳ <span style="color:#38bdf8;">Espada de Diamante</span> (Afiação V, Looting III)</li>
+                    <li>&nbsp;&nbsp;⊳ <b>64x Bifes Cozidos & 8x Maçãs Douradas</b></li>
+                </ul>
+            </div>
+
+            <!-- Grupo VIP MASTER -->
+            <div class="benefit-card master">
+                <h3>💎 Grupo [VIPMASTER] - Vantagens</h3>
+                
+                <div class="benefit-section-title">» Comandos e Utilidades:</div>
+                <ul>
+                    <li>&nbsp;&nbsp;⊳ Limite de homes: <b>15</b></li>
+                    <li>&nbsp;&nbsp;⊳ Comandos: <span style="color:#4ade80;">/Lixo</span>, <span style="color:#4ade80;">/Afk</span>, <span style="color:#4ade80;">/Reparar</span>, <span style="color:#4ade80;">/Bau</span></li>
+                    <li>&nbsp;&nbsp;⊳ Comando: <span style="color:#4ade80;">/Fly</span> (<span style="color:#4ade80;">Ativo apenas nas Claims</span>)</li>
+                    <li>&nbsp;&nbsp;⊳ Comando: <span style="color:#4ade80;">/VN</span> (<span style="color:#4ade80;">Visão Noturna</span>)</li>
+                </ul>
+
+                <div class="benefit-section-title">» Recompensas na Ativação:</div>
+                <ul>
+                    <li>&nbsp;&nbsp;⊳ Dinheiro: <span style="color:#4ade80;">$20.000</span></li>
+                    <li>&nbsp;&nbsp;⊳ Blocos: <b>16x Netherite & 32x Diamante/Ouro/Ferro</b></li>
+                    <li>&nbsp;&nbsp;⊳ Itens Extras: <b>Elytra, 2x Spawners, Beacon, 6x Shulkers</b></li>
+                    <li>&nbsp;&nbsp;⊳ God Apples: <span style="color:#e879f9;">32x Maçãs Douradas Encantadas</span></li>
+                    <li>&nbsp;&nbsp;⊳ Extras: <b>128x Exp, 16x Hoppers, 8x Scrap, 10x Chaves (Caixas)</b></li>
+                </ul>
+
+                <div class="benefit-section-title">» Kit VIP MASTER (/kit vipmaster):</div>
+                <ul>
+                    <li>&nbsp;&nbsp;⊳ <span style="color:#c084fc;">Armadura completa de Netherite</span> (Proteção VI)</li>
+                    <li>&nbsp;&nbsp;⊳ <span style="color:#c084fc;">Ferramentas supremas</span> (Eficiência VII, Fortuna V)</li>
+                    <li>&nbsp;&nbsp;⊳ <span style="color:#c084fc;">Espada de Netherite</span> (Afiação VII, Looting V)</li>
+                    <li>&nbsp;&nbsp;⊳ <b>128x Bifes Cozidos & 16x Maçãs Douradas</b></li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ABA 3: SUPORTE WHATSAPP -->
+    <div id="aba-suporte" class="tab-content">
+        <div class="support-container">
+            <h3>Precisa de Ajuda ou Suporte?</h3>
+            <p>Efetuou o pagamento e tem dúvidas, ou o seu produto/unban demorou a chegar devido à ausência da staff? Fale diretamente connosco através do WhatsApp oficial do servidor!</p>
+            <p style="color: #facc15; font-weight: bold;">WhatsApp: (45) 99936-4591</p>
+            <a href="https://wa.me/5545999364591" class="whatsapp-btn" target="_blank">💬 Abrir Conversa no WhatsApp</a>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Servidor Minecraft. Todos os direitos reservados.</p>
+    </footer>
+
+    <script>
+        function mudarAba(nomeAba, evento) {
+            document.querySelectorAll('.tab-content').forEach(aba => aba.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById('aba-' + nomeAba).classList.add('active');
+            evento.currentTarget.classList.add('active');
+
+            const nickBox = document.getElementById('nickBox');
+            if (nomeAba === 'loja') {
+                nickBox.style.display = 'flex';
+            } else {
+                nickBox.style.display = 'none';
+            }
+        }
+
+        function comprar(urlPagamento) {
+            const nick = document.getElementById('playerNick').value.trim();
+            if (!nick) {
+                alert('Por favor, digite o seu Nick do Minecraft no campo acima antes de prosseguir!');
+                document.getElementById('playerNick').focus();
+                return;
+            }
+            window.open(urlPagamento, '_blank');
+        }
+
+        function enviarComprovante(produto) {
+            const nick = document.getElementById('playerNick').value.trim();
+            if (!nick) {
+                alert('Por favor, digite o seu Nick do Minecraft no campo acima antes de enviar o comprovante!');
+                document.getElementById('playerNick').focus();
+                return;
+            }
+            
+            const mensagem = `Olá! Acabei de realizar o pagamento do produto *${produto}* para o meu nick *${nick}*. Segue em anexo o meu comprovante!`;
+            const urlWhatsApp = `https://wa.me/5545999364591?text=${encodeURIComponent(mensagem)}`;
+            
+            window.open(urlWhatsApp, '_blank');
+        }
+    </script>
+
+</body>
+</html>
